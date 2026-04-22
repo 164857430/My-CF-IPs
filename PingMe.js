@@ -104,7 +104,6 @@ function loadStore() {
 function saveStore(store){$persistentStore.write(JSON.stringify(store),storeKey);}
 function notify(title,body){$notification.post(scriptName,title,body);}
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
-
 function httpGet(url,headers) {
   return new Promise(function(resolve,reject){
     $httpClient.get({url:url,headers:headers},function(err,resp,body){
@@ -113,7 +112,6 @@ function httpGet(url,headers) {
     });
   });
 }
-
 function buildSignedParamsRaw(capture) {
   var params={};
   Object.keys(capture.paramsRaw||{}).forEach(function(k){if(k!=='sign'&&k!=='signDate')params[k]=capture.paramsRaw[k];});
@@ -140,46 +138,77 @@ function runAccount(acc,index,total) {
   var tag='[账号'+(index+1)+'/'+total+' '+(acc.alias||acc.id)+']';
   var headers=buildHeaders(acc.capture);
   var msgs=[tag];
-  function fetchApi(path){return httpGet(buildUrl(path,acc.capture),headers);}
+  console.log('\n===================');
+  console.log(tag+' 开始执行');
+  console.log('===================');
+  function fetchApi(path){
+    console.log(tag+' 发起API请求: ['+path+']');
+    return httpGet(buildUrl(path,acc.capture),headers);
+  }
   function doVideoLoop(count) {
     var i=0;
     function next(){
-      if(i>=count)return Promise.resolve();
+      if(i>=count){console.log(tag+' 所有视频任务执行完毕');return Promise.resolve();}
       return new Promise(function(resolve){
         setTimeout(function(){
           i++;
+          console.log(tag+' 开始观看第 '+i+'/'+count+' 个视频...');
           fetchApi('videoBonus').then(function(res){
             try{
               var d=JSON.parse(res.body);
               if(d.retcode===0){
                 var bonus=(d.result&&d.result.bonus)||'?';
+                console.log(tag+' 🎬 视频'+i+' 观看成功，获得奖励: +'+bonus+' Coins');
                 msgs.push('🎬 视频'+i+'：+'+bonus+' Coins');
                 resolve(next());
-              }else{msgs.push('⏸ 视频'+i+'：'+d.retmsg);resolve();}
-            }catch(e){msgs.push('❌ 视频'+i+'：解析失败');resolve();}
-          }).catch(function(err){msgs.push('❌ 视频'+i+'：'+(err.error||'请求失败'));resolve();});
+              }else{
+                console.log(tag+' ⏸ 视频'+i+' 异常: '+d.retmsg);
+                msgs.push('⏸ 视频'+i+'：'+d.retmsg);
+                resolve();
+              }
+            }catch(e){
+              console.log(tag+' ❌ 视频'+i+' 解析失败');
+              msgs.push('❌ 视频'+i+'：解析失败');
+              resolve();
+            }
+          }).catch(function(err){
+            console.log(tag+' ❌ 视频'+i+' 请求失败: '+(err.error||''));
+            msgs.push('❌ 视频'+i+'：'+(err.error||'请求失败'));
+            resolve();
+          });
         },i===0?1500:VIDEO_DELAY);
       });
     }
     return next();
   }
   return fetchApi('queryBalanceAndBonus').then(function(res){
-    try{var d=JSON.parse(res.body);if(d.retcode===0)msgs.push('💰 余额：'+d.result.balance+' Coins');else msgs.push('⚠️ 查询：'+d.retmsg);}
-    catch(e){msgs.push('❌ 查询：解析失败');}
+    try{
+      var d=JSON.parse(res.body);
+      if(d.retcode===0){console.log(tag+' 💰 初始余额：'+d.result.balance+' Coins');msgs.push('💰 余额：'+d.result.balance+' Coins');}
+      else{console.log(tag+' ⚠️ 查询余额失败：'+d.retmsg);msgs.push('⚠️ 查询：'+d.retmsg);}
+    }catch(e){console.log(tag+' ❌ 查询余额解析失败');msgs.push('❌ 查询：解析失败');}
     return fetchApi('checkIn');
   }).then(function(res){
     try{
       var d=JSON.parse(res.body);
       if(d.retcode===0){
         var hint=((d.result&&d.result.bonusHint)||d.retmsg||'').replace(/\n/g,' ');
+        console.log(tag+' ✅ 签到成功：'+hint);
         msgs.push('✅ 签到：'+hint);
-      }else{msgs.push('⚠️ 签到：'+d.retmsg);}
-    }catch(e){msgs.push('❌ 签到：解析失败');}
+      }else{
+        console.log(tag+' ⚠️ 签到异常：'+d.retmsg);
+        msgs.push('⚠️ 签到：'+d.retmsg);
+      }
+    }catch(e){console.log(tag+' ❌ 签到解析失败');msgs.push('❌ 签到：解析失败');}
     return doVideoLoop(MAX_VIDEO);
   }).then(function(){return fetchApi('queryBalanceAndBonus');}).then(function(res){
-    try{var d=JSON.parse(res.body);if(d.retcode===0)msgs.push('💰 最新余额：'+d.result.balance+' Coins');}catch(e){}
+    try{
+      var d=JSON.parse(res.body);
+      if(d.retcode===0){console.log(tag+' 💰 最新余额：'+d.result.balance+' Coins');msgs.push('💰 最新余额：'+d.result.balance+' Coins');}
+    }catch(e){}
     return msgs.join('\n');
   }).catch(function(err){
+    console.log(tag+' ❌ 账号运行异常: '+(err.error||String(err)));
     msgs.push('❌ 异常：'+(err.error||String(err)));
     return msgs.join('\n');
   });
@@ -187,7 +216,6 @@ function runAccount(acc,index,total) {
 
 // 入口
 if(typeof $request !== 'undefined' && $request) {
-  // 抓包模式：存多账号
   var paramsRaw=parseRawQuery($request.url);
   var headersMap=normalizeHeaderNameMap($request.headers||{});
   var store=loadStore();
@@ -203,7 +231,6 @@ if(typeof $request !== 'undefined' && $request) {
   $done({});
 
 } else {
-  // 定时签到模式：遍历所有账号
   var store2=loadStore();
   var ids=store2.order.filter(function(id){return store2.accounts[id];});
   if(!ids.length){
@@ -212,6 +239,7 @@ if(typeof $request !== 'undefined' && $request) {
   }else{
     var total2=ids.length,results=[];
     var chain=Promise.resolve();
+    console.log('=== 开始运行 PingMe 自动化，共 '+total2+' 个账号 ===');
     ids.forEach(function(id,idx){
       chain=chain
         .then(function(){return runAccount(store2.accounts[id],idx,total2);})
@@ -219,9 +247,11 @@ if(typeof $request !== 'undefined' && $request) {
         .then(function(){return idx<ids.length-1?sleep(ACCOUNT_GAP):null;});
     });
     chain.then(function(){
+      console.log('=== 任务全部执行完毕 ===');
       notify('🎉 全部完成 ('+total2+'个账号)',results.join('\n———\n'));
       $done();
     }).catch(function(err){
+      console.log('❌ 顶层任务异常: '+(err.error||String(err)));
       notify('❌ 任务异常',results.join('\n———\n')+'\n'+(err.error||String(err)));
       $done();
     });
