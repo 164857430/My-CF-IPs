@@ -1,14 +1,12 @@
-/*
-@Name：PingMe 自动化签到+视频奖励（Loon版）
-@Author：怎么肥事（Loon适配）
-
-[Script]
-http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, requires-body=false, tag=PingMe抓包
-cron "55 */2 * * *" script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, tag=PingMe签到
-
-[MITM]
-hostname = api.pingmeapp.net
-*/
+// @Name：PingMe 自动化签到+视频奖励（Loon版）
+// @Author：怎么肥事（Loon适配）
+//
+// [Script]
+// http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, requires-body=false, tag=PingMe抓包
+// cron "55 */2 * * *" script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, tag=PingMe签到
+//
+// [MITM]
+// hostname = api.pingmeapp.net
 
 var scriptName = 'PingMe';
 var storeKey = 'pingme_accounts_v1';
@@ -229,45 +227,42 @@ function runAccount(acc,index,total) {
   });
 }
 
-// ─── 入口判断：抓包 or 定时 ────────────────────────────────────────────────
+// 入口判断：抓包 or 定时
 if(typeof $request !== 'undefined' && $request) {
-  // 抓包模式
   var paramsRaw=parseRawQuery($request.url);
   var headersMap=normalizeHeaderNameMap($request.headers||{});
   var baseUA='';
   Object.keys(headersMap).forEach(function(k){if(k.toLowerCase()==='user-agent')baseUA=headersMap[k];});
   var store=loadStore();
   var fp=fingerprintOf(paramsRaw);
-  var now=Date.now();
+  var nowTs=Date.now();
   var existed=!!store.accounts[fp];
   var uaSeed=existed?store.accounts[fp].uaSeed:store.order.length;
   var alias=existed?store.accounts[fp].alias:'账号'+(store.order.length+1);
-  store.accounts[fp]={id:fp,alias:alias,uaSeed:uaSeed,baseUA:baseUA,capture:{url:$request.url,paramsRaw:paramsRaw,headers:headersMap},createdAt:existed?store.accounts[fp].createdAt:now,updatedAt:now};
+  store.accounts[fp]={id:fp,alias:alias,uaSeed:uaSeed,baseUA:baseUA,capture:{url:$request.url,paramsRaw:paramsRaw,headers:headersMap},createdAt:existed?store.accounts[fp].createdAt:nowTs,updatedAt:nowTs};
   if(!existed)store.order.push(fp);
   saveStore(store);
   var total=store.order.length;
   $notification.post(scriptName,existed?'🔄 账号参数已更新':'✅ 新账号已入库',alias+'（id:'+fp+'）\n当前账号总数：'+total);
-  console.log('【'+scriptName+'】'+(existed?'update':'add')+' account '+fp+'\n'+JSON.stringify(store.accounts[fp],null,2));
   $done({});
 
 } else {
-  // 定时签到模式
-  var store=loadStore();
-  var ids=store.order.filter(function(id){return store.accounts[id];});
+  var store2=loadStore();
+  var ids=store2.order.filter(function(id){return store2.accounts[id];});
   if(!ids.length){
     $notification.post(scriptName,'⚠️ 未抓到任何账号','请先打开 PingMe 触发抓包');
     $done();
   }else{
-    var total=ids.length,results=[];
+    var total2=ids.length,results=[];
     var chain=Promise.resolve();
     ids.forEach(function(id,idx){
       chain=chain
-        .then(function(){return runAccount(store.accounts[id],idx,total);})
+        .then(function(){return runAccount(store2.accounts[id],idx,total2);})
         .then(function(text){results.push(text);})
         .then(function(){return idx<ids.length-1?sleep(ACCOUNT_GAP):null;});
     });
     chain.then(function(){
-      $notification.post(scriptName,'🎉 全部完成 ('+total+'个账号)',results.join('\n———\n'));
+      $notification.post(scriptName,'🎉 全部完成 ('+total2+'个账号)',results.join('\n———\n'));
       $done();
     }).catch(function(err){
       $notification.post(scriptName,'❌ 任务异常',results.join('\n———\n')+'\n'+(err.error||String(err)));
