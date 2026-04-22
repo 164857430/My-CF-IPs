@@ -1,35 +1,33 @@
-//2026/04/21
-/*
-@Name：WeTalk 自动化签到+视频奖励
-@Author：TG@ZenMoFiShi (Modified for Multi-Env)
-
-====================================
-[Quantumult X]
-====================================
-[rewrite_local]
-^https:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus url script-request-header https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js
-
-[task_local]
-20 8,20 * * * https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, tag=WeTalk签到, enabled=true
-
-====================================
-[Surge / Loon / Shadowrocket]
-====================================
-[Script]
-WeTalk抓包 = type=http-request, pattern=^https:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus, script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, requires-body=true
-WeTalk签到 = type=cron, cronexp="20 8,20 * * *", script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, wake-system=true, timeout=120
-Loon
-[Script]
-# WeTalk 抓包
-http-request ^https:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, requires-body=true, tag=WeTalk抓包
-
-# WeTalk 定时签到
-cron "20 8,20 * * *" script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, tag=WeTalk签到
-
-
-[MITM]
-hostname = api.wetalkapp.com
-*/
+// 2026/04/21
+// @Name：WeTalk 自动化签到+视频奖励
+// @Author：TG@ZenMoFiShi (Modified for Multi-Env)
+//
+// ====================================
+// [Quantumult X]
+// ====================================
+// [rewrite_local]
+// ^https:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus url script-request-header https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js
+//
+// [task_local]
+// 20 */2 * * * https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, tag=WeTalk签到, enabled=true
+//
+// ====================================
+// [Surge / Loon / Shadowrocket]
+// ====================================
+// [Script]
+// WeTalk抓包 = type=http-request, pattern=^https:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus, script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, requires-body=true
+// WeTalk签到 = type=cron, cronexp="20 */2 * * *", script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, wake-system=true, timeout=120
+//
+// Loon
+// [Script]
+// # WeTalk 抓包
+// http-request ^https:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, requires-body=true, tag=WeTalk抓包
+//
+// # WeTalk 定时签到
+// cron "20 */2 * * *" script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk.js, tag=WeTalk签到
+//
+// [MITM]
+// hostname = api.wetalkapp.com
 
 const $ = new Env('WeTalk');
 
@@ -176,267 +174,4 @@ function buildUA(baseUA, seed) {
   const iosVer = pickItem(IOS_VERSIONS, seed);
   const scale = pickItem(IOS_SCALES, seed + 1);
   const model = pickItem(IPHONE_MODELS, seed + 2);
-  const cfn = pickItem(CFN_VERS, seed + 3);
-  const darwin = pickItem(DARWIN_VERS, seed + 4);
-  if (baseUA && typeof baseUA === 'string') {
-    let ua = baseUA;
-    let changed = false;
-    if (/iOS \d+(\.\d+){0,2}/.test(ua)) { ua = ua.replace(/iOS \d+(\.\d+){0,2}/, `iOS ${iosVer}`); changed = true; }
-    if (/Scale\/\d+(\.\d+)?/.test(ua)) { ua = ua.replace(/Scale\/\d+(\.\d+)?/, `Scale/${scale}`); changed = true; }
-    if (/iPhone\d+,\d+/.test(ua)) { ua = ua.replace(/iPhone\d+,\d+/, model); changed = true; }
-    if (/CFNetwork\/[\d.]+/.test(ua)) { ua = ua.replace(/CFNetwork\/[\d.]+/, `CFNetwork/${cfn}`); changed = true; }
-    if (/Darwin\/[\d.]+/.test(ua)) { ua = ua.replace(/Darwin\/[\d.]+/, `Darwin/${darwin}`); changed = true; }
-    if (changed) return ua;
-  }
-  return `WeTalk/30.6.0 (com.innovationworks.wetalk; build:28; iOS ${iosVer}) Alamofire/5.4.3`;
-}
-
-function buildSignedParamsRaw(capture) {
-  const params = {};
-  Object.keys(capture.paramsRaw || {}).forEach(k => {
-    if (k !== 'sign' && k !== 'signDate') params[k] = capture.paramsRaw[k];
-  });
-  params.signDate = getUTCSignDate();
-  const signBase = Object.keys(params).sort().map(k => `${k}=${params[k]}`).join('&');
-  params.sign = MD5(signBase + SECRET);
-  return params;
-}
-
-function buildUrl(path, capture) {
-  const params = buildSignedParamsRaw(capture);
-  const qs = Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k])}`).join('&');
-  return `https://${API_HOST}/app/${path}?${qs}`;
-}
-
-function cloneHeaders(headers) {
-  const out = {};
-  Object.keys(headers || {}).forEach(k => out[k] = headers[k]);
-  return out;
-}
-
-function buildHeaders(capture, ua) {
-  const headers = cloneHeaders(capture.headers || {});
-  delete headers['Content-Length']; delete headers['content-length'];
-  delete headers[':authority']; delete headers[':method']; delete headers[':path']; delete headers[':scheme'];
-  headers['Host'] = API_HOST;
-  headers['Accept'] = headers['Accept'] || 'application/json';
-  Object.keys(headers).forEach(k => { if (k.toLowerCase() === 'user-agent') delete headers[k]; });
-  headers['User-Agent'] = ua;
-  return headers;
-}
-
-function notify(title, body) {
-  $.msg($.name, title, body);
-}
-
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
-
-function runAccount(acc, index, total) {
-  const tag = `[账号${index+1}/${total} ${acc.alias || acc.id}]`;
-  const ua = buildUA(acc.baseUA, acc.uaSeed);
-  const headers = buildHeaders(acc.capture, ua);
-  const msgs = [tag];
-  
-  $.log(`\n===================`);
-  $.log(`${tag} 开始执行`);
-  $.log(`===================`);
-
-  function fetchApi(path) {
-    const url = buildUrl(path, acc.capture);
-    $.log(`${tag} 发起API请求: [${path}]`);
-    return $.fetch({ url, method: 'GET', headers });
-  }
-
-  function doVideoLoop(count) {
-    let i = 0;
-    function next() {
-      if (i >= count) {
-        $.log(`${tag} 所有视频任务执行完毕`);
-        return Promise.resolve();
-      }
-      return new Promise(resolve => {
-        setTimeout(() => {
-          i++;
-          $.log(`${tag} 开始观看第 ${i}/${count} 个视频...`);
-          fetchApi('videoBonus').then(res => {
-            try {
-              const d = JSON.parse(res.body);
-              if (d.retcode === 0) {
-                $.log(`${tag} 🎬 视频${i} 观看成功，获得奖励: +${d.result?.bonus || '?'} Coins`);
-                msgs.push(`🎬 视频${i}：+${d.result?.bonus || '?'} Coins`);
-                resolve(next());
-              } else {
-                $.log(`${tag} ⏸ 视频${i} 异常: ${d.retmsg}`);
-                msgs.push(`⏸ 视频${i}：${d.retmsg}`);
-                resolve();
-              }
-            } catch (e) {
-              $.log(`${tag} ❌ 视频${i} 解析失败: ${e}`);
-              msgs.push(`❌ 视频${i}：解析失败`);
-              resolve();
-            }
-          }).catch(err => {
-            $.log(`${tag} ❌ 视频${i} 网络请求失败: ${err}`);
-            msgs.push(`❌ 视频${i}：${err.error || '请求失败'}`);
-            resolve();
-          });
-        }, i === 0 ? 1500 : VIDEO_DELAY);
-      });
-    }
-    return next();
-  }
-
-  return fetchApi('queryBalanceAndBonus').then(res => {
-    try {
-      const d = JSON.parse(res.body);
-      if (d.retcode === 0) {
-        $.log(`${tag} 💰 初始余额：${d.result.balance} Coins`);
-        msgs.push(`💰 余额：${d.result.balance} Coins`);
-      } else {
-        $.log(`${tag} ⚠️ 查询余额失败：${d.retmsg}`);
-        msgs.push(`⚠️ 查询：${d.retmsg}`);
-      }
-    } catch (e) {
-      $.log(`${tag} ❌ 查询余额解析失败: ${e}`);
-      msgs.push('❌ 查询：解析失败');
-    }
-    return fetchApi('checkIn');
-  }).then(res => {
-    try {
-      const d = JSON.parse(res.body);
-      if (d.retcode === 0) {
-        const hint = (d.result?.bonusHint || d.retmsg || '').replace(/\n/g, ' ');
-        $.log(`${tag} ✅ 签到成功：${hint}`);
-        msgs.push(`✅ 签到：${hint}`);
-      } else {
-        $.log(`${tag} ⚠️ 签到异常：${d.retmsg}`);
-        msgs.push(`⚠️ 签到：${d.retmsg}`);
-      }
-    } catch (e) {
-      $.log(`${tag} ❌ 签到解析失败: ${e}`);
-      msgs.push('❌ 签到：解析失败');
-    }
-    return doVideoLoop(MAX_VIDEO);
-  }).then(() => fetchApi('queryBalanceAndBonus')).then(res => {
-    try {
-      const d = JSON.parse(res.body);
-      if (d.retcode === 0) {
-        $.log(`${tag} 💰 最新余额：${d.result.balance} Coins`);
-        msgs.push(`💰 最新余额：${d.result.balance} Coins`);
-      }
-    } catch (e) {}
-    return msgs.join('\n');
-  }).catch(err => {
-    $.log(`${tag} ❌ 账号运行异常: ${err}`);
-    msgs.push(`❌ 异常：${err.error || String(err)}`);
-    return msgs.join('\n');
-  });
-}
-
-// Env 运行环境兼容类 (Surge/Loon/QX)
-function Env(name) {
-  class Wrapper {
-    constructor(name) {
-      this.name = name;
-      this.isSurge = () => "undefined" !== typeof $httpClient && "undefined" === typeof $loon;
-      this.isLoon = () => "undefined" !== typeof $loon;
-      this.isQX = () => "undefined" !== typeof $task;
-    }
-    log(msg) {
-      console.log(`[${this.name}] ${msg}`);
-    }
-    getdata(key) {
-      if (this.isSurge() || this.isLoon()) return $persistentStore.read(key);
-      if (this.isQX()) return $prefs.valueForKey(key);
-    }
-    setdata(val, key) {
-      if (this.isSurge() || this.isLoon()) return $persistentStore.write(val, key);
-      if (this.isQX()) return $prefs.setValueForKey(val, key);
-    }
-    msg(title, subtitle, body) {
-      if (this.isSurge() || this.isLoon()) $notification.post(title, subtitle, body);
-      if (this.isQX()) $notify(title, subtitle, body);
-    }
-    fetch(options) {
-      return new Promise((resolve, reject) => {
-        if (this.isQX()) {
-          $task.fetch(options).then(res => resolve(res), err => reject(err.error || err));
-        } else if (this.isSurge() || this.isLoon()) {
-          const method = (options.method || "GET").toLowerCase();
-          $httpClient[method](options, (err, res, body) => {
-            if (err) reject(err);
-            else { res.body = body; resolve(res); }
-          });
-        }
-      });
-    }
-    done(val = {}) {
-      $done(val);
-    }
-  }
-  return new Wrapper(name);
-}
-
-// 主逻辑入口
-if (typeof $request !== 'undefined' && $request) {
-  const paramsRaw = parseRawQuery($request.url);
-  const headersMap = normalizeHeaderNameMap($request.headers || {});
-  let baseUA = '';
-  Object.keys(headersMap).forEach(k => { if (k.toLowerCase() === 'user-agent') baseUA = headersMap[k]; });
-
-  const store = loadStore();
-  const fp = fingerprintOf(paramsRaw);
-  const now = Date.now();
-  const existed = !!store.accounts[fp];
-  const uaSeed = existed ? store.accounts[fp].uaSeed : store.order.length;
-  const alias = existed ? store.accounts[fp].alias : `账号${store.order.length + 1}`;
-
-  store.accounts[fp] = {
-    id: fp,
-    alias,
-    uaSeed,
-    baseUA,
-    capture: { url: $request.url, paramsRaw, headers: headersMap },
-    createdAt: existed ? store.accounts[fp].createdAt : now,
-    updatedAt: now
-  };
-  if (!existed) store.order.push(fp);
-  saveStore(store);
-
-  const total = store.order.length;
-  notify(existed ? '🔄 账号参数已更新' : '✅ 新账号已入库', `${alias}（id:${fp}）\n当前账号总数：${total}`);
-  $.log(`获取/更新账号 Token 成功: ID => ${fp}`);
-  $.done({});
-} else {
-  const store = loadStore();
-  const ids = store.order.filter(id => store.accounts[id]);
-  if (!ids.length) {
-    $.log("未检测到已存储的账号数据，请先抓包");
-    notify('⚠️ 未抓到任何账号', '请先打开 WeTalk 触发抓包');
-    $.done();
-  } else {
-    const total = ids.length;
-    const results = [];
-    let chain = Promise.resolve();
-    
-    $.log(`=== 开始运行 WeTalk 自动化，共 ${total} 个账号 ===`);
-
-    ids.forEach((id, idx) => {
-      chain = chain.then(() => runAccount(store.accounts[id], idx, total))
-        .then(text => { results.push(text); })
-        .then(() => idx < ids.length - 1 ? sleep(ACCOUNT_GAP) : null);
-    });
-    
-    chain.then(() => {
-      $.log("=== 任务全部执行完毕 ===");
-      notify(`🎉 全部完成 (${total}个账号)`, results.join('\n———\n'));
-      $.done();
-    }).catch(err => {
-      $.log(`❌ 顶层任务异常: ${err}`);
-      notify('❌ 任务异常', results.join('\n———\n') + '\n' + (err.error || String(err)));
-      $.done();
-    });
-  }
-}
+  const c
