@@ -2,7 +2,7 @@
 @Name：PingMe 抓包（Loon版）
 
 [Script]
-http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe_capture.js, requires-body=false, tag=PingMe抓包
+http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, requires-body=false, tag=PingMe抓包
 cron "55 */2 * * *" script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, tag=PingMe签到
 [MITM]
 hostname = api.pingmeapp.net
