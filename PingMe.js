@@ -1,33 +1,35 @@
-// 2026/04/20
-// @Name：PingMe 自动化签到+视频奖励
-// @Author：怎么肥事 (Modified for Multi-Env)
-//
-// ====================================
-// [Quantumult X]
-// ====================================
-// [rewrite_local]
-// ^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus url script-request-header https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js
-//
-// [task_local]
-// 55 */2 * * * https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, tag=PingMe签到, enabled=true
-//
-// ====================================
-// [Surge / Loon / Shadowrocket]
-// ====================================
-// [Script]
-// PingMe抓包 = type=http-request, pattern=^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus, script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, requires-body=true
-// PingMe签到 = type=cron, cronexp="55 */2 * * *", script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, wake-system=true, timeout=120
-//
-// Loon
-// [Script]
-// # PingMe 抓包
-// http-request ^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, requires-body=true, tag=PingMe抓包
-//
-// # PingMe 定时签到
-// cron "55 */2 * * *" script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, tag=PingMe签到
-//
-// [MITM]
-// hostname = api.pingmeapp.net
+//2026/04/20
+/*
+@Name：PingMe 自动化签到+视频奖励
+@Author：怎么肥事 (Modified for Multi-Env)
+
+====================================
+[Quantumult X]
+====================================
+[rewrite_local]
+^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus url script-request-header https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js
+
+[task_local]
+55 0,2,4,6,8,10,12,14,16,18,20,22 * * * https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, tag=PingMe签到, enabled=true
+
+====================================
+[Surge / Loon / Shadowrocket]
+====================================
+[Script]
+PingMe抓包 = type=http-request, pattern=^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus, script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, requires-body=true
+PingMe签到 = type=cron, cronexp="55 0,2,4,6,8,10,12,14,16,18,20,22 * * *", script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, wake-system=true, timeout=120
+
+Loon
+[Script]
+# PingMe 抓包
+http-request ^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, requires-body=true, tag=PingMe抓包
+
+# PingMe 定时签到
+cron "55 0,2,4,6,8,10,12,14,16,18,20,22 * * *" script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, tag=PingMe签到
+
+[MITM]
+hostname = api.pingmeapp.net
+*/
 
 const $ = new Env('PingMe');
 
@@ -99,9 +101,4 @@ function MD5(string) {
     a = FF(a,b,c,d,x[k+0],S11,0xD76AA478); d = FF(d,a,b,c,x[k+1],S12,0xE8C7B756); c = FF(c,d,a,b,x[k+2],S13,0x242070DB); b = FF(b,c,d,a,x[k+3],S14,0xC1BDCEEE);
     a = FF(a,b,c,d,x[k+4],S11,0xF57C0FAF); d = FF(d,a,b,c,x[k+5],S12,0x4787C62A); c = FF(c,d,a,b,x[k+6],S13,0xA8304613); b = FF(b,c,d,a,x[k+7],S14,0xFD469501);
     a = FF(a,b,c,d,x[k+8],S11,0x698098D8); d = FF(d,a,b,c,x[k+9],S12,0x8B44F7AF); c = FF(c,d,a,b,x[k+10],S13,0xFFFF5BB1); b = FF(b,c,d,a,x[k+11],S14,0x895CD7BE);
-    a = FF(a,b,c,d,x[k+12],S11,0x6B901122); d = FF(d,a,b,c,x[k+13],S12,0xFD987193); c = FF(c,d,a,b,x[k+14],S13,0xA679438E); b = FF(b,c,d,a,x[k+15],S14,0x49B40821);
-    a = GG(a,b,c,d,x[k+1],S21,0xF61E2562); d = GG(d,a,b,c,x[k+6],S22,0xC040B340); c = GG(c,d,a,b,x[k+11],S23,0x265E5A51); b = GG(b,c,d,a,x[k+0],S24,0xE9B6C7AA);
-    a = GG(a,b,c,d,x[k+5],S21,0xD62F105D); d = GG(d,a,b,c,x[k+10],S22,0x02441453); c = GG(c,d,a,b,x[k+15],S23,0xD8A1E681); b = GG(b,c,d,a,x[k+4],S24,0xE7D3FBC8);
-    a = GG(a,b,c,d,x[k+9],S21,0x21E1CDE6); d = GG(d,a,b,c,x[k+14],S22,0xC33707D6); c = GG(c,d,a,b,x[k+3],S23,0xF4D50D87); b = GG(b,c,d,a,x[k+8],S24,0x455A14ED);
-    a = GG(a,b,c,d,x[k+13],S21,0xA9E3E905); d = GG(d,a,b,c,x[k+2],S22,0xFCEFA3F8); c = GG(c,d,a,b,x[k+7],S23,0x676F02D9); b = GG(b,c,d,a,x[k+12],S24,0x8D2A4C8A);
-    a = HH(a,b,c,d,x[k
+    a = FF(a,b,c,d,x[k+12],S11,0x6B901122); d = FF(d,a,b,c,x[k+13],S12,0xFD987193); c = FF(c,d,a,b,x[k+14],S13,0xA679438E); b = FF(b,c,d,a,x[k+15],S14,0x49B4
