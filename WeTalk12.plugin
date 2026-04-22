@@ -2,7 +2,7 @@
 #!desc = 每日签到，loon适配版（6账号分组 + 独立签到开关）
 #!date = 2026-4-22
 #!author = TG@ZenMoFiShi（修改为6组+独立签到开关）
-#!icon = https://raw.githubusercontent.com/axhani/icon/refs/heads/main/WeTalk.png
+#!icon = https://raw.githubusercontent.com/Xhy333/QuantumultX/main/icon/WeTalk.png
 #!loon_version = 3.2.4(787)
 
 [Argument]
