@@ -1,21 +1,43 @@
 #!name = PingMe
 #!desc = 每日签到，loon适配版（多账号分组）
-#!date = 2026-4-20
-#!author = 怎么肥事[https://t.me/Nzmgs]
+#!date = 2026-4-22
+#!author = 怎么肥事[https://t.me/Nzmgs]（修改版）
 #!icon = https://raw.githubusercontent.com/axhani/icon/refs/heads/main/PingMe.png
 #!loon_version = 3.2.4(787)
 
 [Argument]
+# 开关
 arg2 = switch,flag,tag=token组1
 arg5 = switch,flag,tag=token组2
+arg8 = switch,flag,tag=token组3
+arg11 = switch,flag,tag=token组4
+arg14 = switch,flag,tag=token组5
+arg17 = switch,flag,tag=token组6
+
+# Cron 时间
 arg1 = input,"30 8,20 * * *",tag=cron组1
 arg3 = input,"40 8,20 * * *",tag=cron组2
+arg6 = input,"50 8,20 * * *",tag=cron组3
+arg9 = input,"0 9,21 * * *",tag=cron组4
+arg12 = input,"10 9,21 * * *",tag=cron组5
+arg15 = input,"20 9,21 * * *",tag=cron组6
 
 [Script]
+# 抓包部分（登录不同账号时点击“我的”页面抓取）
 http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe1.js, timeout=300, enable={arg2}, tag=PingMe抓包组1
 http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe2.js, timeout=300, enable={arg5}, tag=PingMe抓包组2
+http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe3.js, timeout=300, enable={arg8}, tag=PingMe抓包组3
+http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe4.js, timeout=300, enable={arg11}, tag=PingMe抓包组4
+http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe5.js, timeout=300, enable={arg14}, tag=PingMe抓包组5
+http-request ^https?:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe6.js, timeout=300, enable={arg17}, tag=PingMe抓包组6
+
+# 定时签到部分
 cron {arg1} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe1.js, timeout=120, tag=PingMe组1签到
 cron {arg3} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe2.js, timeout=120, tag=PingMe组2签到
+cron {arg6} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe3.js, timeout=120, tag=PingMe组3签到
+cron {arg9} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe4.js, timeout=120, tag=PingMe组4签到
+cron {arg12} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe5.js, timeout=120, tag=PingMe组5签到
+cron {arg15} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe6.js, timeout=120, tag=PingMe组6签到
 
 [MITM]
 hostname = api.pingmeapp.net
