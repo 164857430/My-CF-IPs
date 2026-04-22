@@ -7,25 +7,25 @@
 [Quantumult X]
 ====================================
 [rewrite_local]
-^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus url script-request-header https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js
+^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus url script-request-header https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js
 
 [task_local]
-30 8,20 * * * https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js, tag=PingMe签到, enabled=true
+55 */2 * * * https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, tag=PingMe签到, enabled=true
 
 ====================================
 [Surge / Loon / Shadowrocket]
 ====================================
 [Script]
-PingMe抓包 = type=http-request, pattern=^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus, script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js, requires-body=true
-PingMe签到 = type=cron, cronexp="30 8,20 * * *", script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js, wake-system=true, timeout=120
+PingMe抓包 = type=http-request, pattern=^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus, script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, requires-body=true
+PingMe签到 = type=cron, cronexp="55 */2 * * *", script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, wake-system=true, timeout=120
 
 Loon
 [Script]
 # PingMe 抓包
-http-request ^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js, requires-body=true, tag=PingMe抓包
+http-request ^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, requires-body=true, tag=PingMe抓包
 
 # PingMe 定时签到
-cron "30 8,20 * * *" script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js, tag=PingMe签到
+cron "55 */2 * * *" script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, tag=PingMe签到
 
 [MITM]
 hostname = api.pingmeapp.net
@@ -173,228 +173,3 @@ function pickItem(arr, seed) {
 }
 
 function buildUA(baseUA, seed) {
-  const iosVer = pickItem(IOS_VERSIONS, seed);
-  const scale = pickItem(IOS_SCALES, seed + 1);
-  const model = pickItem(IPHONE_MODELS, seed + 2);
-  const cfn = pickItem(CFN_VERS, seed + 3);
-  const darwin = pickItem(DARWIN_VERS, seed + 4);
-  if (baseUA && typeof baseUA === 'string') {
-    let ua = baseUA;
-    let changed = false;
-    if (/iOS \d+(\.\d+){0,2}/.test(ua)) { ua = ua.replace(/iOS \d+(\.\d+){0,2}/, `iOS ${iosVer}`); changed = true; }
-    if (/Scale\/\d+(\.\d+)?/.test(ua)) { ua = ua.replace(/Scale\/\d+(\.\d+)?/, `Scale/${scale}`); changed = true; }
-    if (/iPhone\d+,\d+/.test(ua)) { ua = ua.replace(/iPhone\d+,\d+/, model); changed = true; }
-    if (/CFNetwork\/[\d.]+/.test(ua)) { ua = ua.replace(/CFNetwork\/[\d.]+/, `CFNetwork/${cfn}`); changed = true; }
-    if (/Darwin\/[\d.]+/.test(ua)) { ua = ua.replace(/Darwin\/[\d.]+/, `Darwin/${darwin}`); changed = true; }
-    if (changed) return ua;
-  }
-  return `PingMe/1.0.0 (${model}; iOS ${iosVer}; Scale/${scale}) CFNetwork/${cfn} Darwin/${darwin}`;
-}
-
-function buildSignedParamsRaw(capture) {
-  const params = {};
-  Object.keys(capture.paramsRaw || {}).forEach(k => {
-    if (k !== 'sign' && k !== 'signDate') params[k] = capture.paramsRaw[k];
-  });
-  params.signDate = getUTCSignDate();
-  const signBase = Object.keys(params).sort().map(k => `${k}=${params[k]}`).join('&');
-  params.sign = MD5(signBase + SECRET);
-  return params;
-}
-
-function buildUrl(path, capture) {
-  const params = buildSignedParamsRaw(capture);
-  const qs = Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k])}`).join('&');
-  return `https://api.pingmeapp.net/app/${path}?${qs}`;
-}
-
-function cloneHeaders(headers) {
-  const out = {};
-  Object.keys(headers || {}).forEach(k => out[k] = headers[k]);
-  return out;
-}
-
-function buildHeaders(capture, ua) {
-  const headers = cloneHeaders(capture.headers || {});
-  delete headers['Content-Length']; delete headers['content-length'];
-  delete headers[':authority']; delete headers[':method']; delete headers[':path']; delete headers[':scheme'];
-  headers['Host'] = 'api.pingmeapp.net';
-  headers['Accept'] = headers['Accept'] || 'application/json';
-  Object.keys(headers).forEach(k => { if (k.toLowerCase() === 'user-agent') delete headers[k]; });
-  headers['User-Agent'] = ua;
-  return headers;
-}
-
-function notify(title, body) {
-  $.msg(scriptName, title, body);
-}
-
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
-
-function runAccount(acc, index, total) {
-  const tag = `[账号${index+1}/${total} ${acc.alias || acc.id}]`;
-  const ua = buildUA(acc.baseUA, acc.uaSeed);
-  const headers = buildHeaders(acc.capture, ua);
-  const msgs = [tag];
-
-  function fetchApi(path) {
-    return $.fetch({ url: buildUrl(path, acc.capture), method: 'GET', headers });
-  }
-
-  function doVideoLoop(count) {
-    let i = 0;
-    function next() {
-      if (i >= count) return Promise.resolve();
-      return new Promise(resolve => {
-        setTimeout(() => {
-          i++;
-          fetchApi('videoBonus').then(res => {
-            try {
-              const d = JSON.parse(res.body);
-              if (d.retcode === 0) {
-                msgs.push(`🎬 视频${i}：+${d.result?.bonus || '?'} Coins`);
-                resolve(next());
-              } else {
-                msgs.push(`⏸ 视频${i}：${d.retmsg}`);
-                resolve();
-              }
-            } catch (e) {
-              msgs.push(`❌ 视频${i}：解析失败`);
-              resolve();
-            }
-          }).catch(err => {
-            msgs.push(`❌ 视频${i}：${err.error || '请求失败'}`);
-            resolve();
-          });
-        }, i === 0 ? 1500 : VIDEO_DELAY);
-      });
-    }
-    return next();
-  }
-
-  return fetchApi('queryBalanceAndBonus').then(res => {
-    try {
-      const d = JSON.parse(res.body);
-      if (d.retcode === 0) msgs.push(`💰 余额：${d.result.balance} Coins`);
-      else msgs.push(`⚠️ 查询：${d.retmsg}`);
-    } catch (e) { msgs.push('❌ 查询：解析失败'); }
-    return fetchApi('checkIn');
-  }).then(res => {
-    try {
-      const d = JSON.parse(res.body);
-      if (d.retcode === 0) msgs.push(`✅ 签到：${(d.result?.bonusHint || d.retmsg || '').replace(/\n/g, ' ')}`);
-      else msgs.push(`⚠️ 签到：${d.retmsg}`);
-    } catch (e) { msgs.push('❌ 签到：解析失败'); }
-    return doVideoLoop(MAX_VIDEO);
-  }).then(() => fetchApi('queryBalanceAndBonus')).then(res => {
-    try {
-      const d = JSON.parse(res.body);
-      if (d.retcode === 0) msgs.push(`💰 最新余额：${d.result.balance} Coins`);
-    } catch (e) {}
-    return msgs.join('\n');
-  }).catch(err => {
-    msgs.push(`❌ 异常：${err.error || String(err)}`);
-    return msgs.join('\n');
-  });
-}
-
-// Env 运行环境兼容类 (Surge/Loon/QX)
-function Env(name) {
-  class Wrapper {
-    constructor(name) {
-      this.name = name;
-      this.isSurge = () => "undefined" !== typeof $httpClient && "undefined" === typeof $loon;
-      this.isLoon = () => "undefined" !== typeof $loon;
-      this.isQX = () => "undefined" !== typeof $task;
-    }
-    log(msg) {
-      console.log(`[${this.name}] ${msg}`);
-    }
-    getdata(key) {
-      if (this.isSurge() || this.isLoon()) return $persistentStore.read(key);
-      if (this.isQX()) return $prefs.valueForKey(key);
-    }
-    setdata(val, key) {
-      if (this.isSurge() || this.isLoon()) return $persistentStore.write(val, key);
-      if (this.isQX()) return $prefs.setValueForKey(val, key);
-    }
-    msg(title, subtitle, body) {
-      if (this.isSurge() || this.isLoon()) $notification.post(title, subtitle, body);
-      if (this.isQX()) $notify(title, subtitle, body);
-    }
-    fetch(options) {
-      return new Promise((resolve, reject) => {
-        if (this.isQX()) {
-          $task.fetch(options).then(res => resolve(res), err => reject(err.error || err));
-        } else if (this.isSurge() || this.isLoon()) {
-          const method = (options.method || "GET").toLowerCase();
-          $httpClient[method](options, (err, res, body) => {
-            if (err) reject(err);
-            else { res.body = body; resolve(res); }
-          });
-        }
-      });
-    }
-    done(val = {}) {
-      $done(val);
-    }
-  }
-  return new Wrapper(name);
-}
-
-// 主逻辑入口
-if (typeof $request !== 'undefined' && $request) {
-  const paramsRaw = parseRawQuery($request.url);
-  const headersMap = normalizeHeaderNameMap($request.headers || {});
-  let baseUA = '';
-  Object.keys(headersMap).forEach(k => { if (k.toLowerCase() === 'user-agent') baseUA = headersMap[k]; });
-
-  const store = loadStore();
-  const fp = fingerprintOf(paramsRaw);
-  const now = Date.now();
-  const existed = !!store.accounts[fp];
-  const uaSeed = existed ? store.accounts[fp].uaSeed : store.order.length;
-  const alias = existed ? store.accounts[fp].alias : `账号${store.order.length + 1}`;
-
-  store.accounts[fp] = {
-    id: fp,
-    alias,
-    uaSeed,
-    baseUA,
-    capture: { url: $request.url, paramsRaw, headers: headersMap },
-    createdAt: existed ? store.accounts[fp].createdAt : now,
-    updatedAt: now
-  };
-  if (!existed) store.order.push(fp);
-  saveStore(store);
-
-  const total = store.order.length;
-  notify(existed ? '🔄 账号参数已更新' : '✅ 新账号已入库', `${alias}（id:${fp}）\n当前账号总数：${total}`);
-  $.log(`【${scriptName}】${existed ? 'update' : 'add'} account ${fp}\n${JSON.stringify(store.accounts[fp], null, 2)}`);
-  $.done({});
-} else {
-  const store = loadStore();
-  const ids = store.order.filter(id => store.accounts[id]);
-  if (!ids.length) {
-    notify('⚠️ 未抓到任何账号', '请先打开 PingMe 触发抓包');
-    $.done();
-  } else {
-    const total = ids.length;
-    const results = [];
-    let chain = Promise.resolve();
-    ids.forEach((id, idx) => {
-      chain = chain.then(() => runAccount(store.accounts[id], idx, total))
-        .then(text => { results.push(text); })
-        .then(() => idx < ids.length - 1 ? sleep(ACCOUNT_GAP) : null);
-    });
-    chain.then(() => {
-      notify(`🎉 全部完成 (${total}个账号)`, results.join('\n———\n'));
-      $.done();
-    }).catch(err => {
-      notify('❌ 任务异常', results.join('\n———\n') + '\n' + (err.error || String(err)));
-      $.done();
-    });
-  }
-}
