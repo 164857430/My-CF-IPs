@@ -59,4 +59,239 @@ function MD5(string) {
     var AA=a,BB=b,CC=c,DD=d;
     a=FF(a,b,c,d,x[k+0],S11,0xD76AA478);d=FF(d,a,b,c,x[k+1],S12,0xE8C7B756);c=FF(c,d,a,b,x[k+2],S13,0x242070DB);b=FF(b,c,d,a,x[k+3],S14,0xC1BDCEEE);
     a=FF(a,b,c,d,x[k+4],S11,0xF57C0FAF);d=FF(d,a,b,c,x[k+5],S12,0x4787C62A);c=FF(c,d,a,b,x[k+6],S13,0xA8304613);b=FF(b,c,d,a,x[k+7],S14,0xFD469501);
-    a=FF(a,b,c,d,x[k+8],S11,0x698098D8);d=FF(d,a,b,c,x[k+9],S12,0x8B44F7AF);c=FF(c,d,
+    a=FF(a,b,c,d,x[k+8],S11,0x698098D8);d=FF(d,a,b,c,x[k+9],S12,0x8B44F7AF);c=FF(c,d,a,b,x[k+10],S13,0xFFFF5BB1);b=FF(b,c,d,a,x[k+11],S14,0x895CD7BE);
+    a=FF(a,b,c,d,x[k+12],S11,0x6B901122);d=FF(d,a,b,c,x[k+13],S12,0xFD987193);c=FF(c,d,a,b,x[k+14],S13,0xA679438E);b=FF(b,c,d,a,x[k+15],S14,0x49B40821);
+    a=GG(a,b,c,d,x[k+1],S21,0xF61E2562);d=GG(d,a,b,c,x[k+6],S22,0xC040B340);c=GG(c,d,a,b,x[k+11],S23,0x265E5A51);b=GG(b,c,d,a,x[k+0],S24,0xE9B6C7AA);
+    a=GG(a,b,c,d,x[k+5],S21,0xD62F105D);d=GG(d,a,b,c,x[k+10],S22,0x02441453);c=GG(c,d,a,b,x[k+15],S23,0xD8A1E681);b=GG(b,c,d,a,x[k+4],S24,0xE7D3FBC8);
+    a=GG(a,b,c,d,x[k+9],S21,0x21E1CDE6);d=GG(d,a,b,c,x[k+14],S22,0xC33707D6);c=GG(c,d,a,b,x[k+3],S23,0xF4D50D87);b=GG(b,c,d,a,x[k+8],S24,0x455A14ED);
+    a=GG(a,b,c,d,x[k+13],S21,0xA9E3E905);d=GG(d,a,b,c,x[k+2],S22,0xFCEFA3F8);c=GG(c,d,a,b,x[k+7],S23,0x676F02D9);b=GG(b,c,d,a,x[k+12],S24,0x8D2A4C8A);
+    a=HH(a,b,c,d,x[k+5],S31,0xFFFA3942);d=HH(d,a,b,c,x[k+8],S32,0x8771F681);c=HH(c,d,a,b,x[k+11],S33,0x6D9D6122);b=HH(b,c,d,a,x[k+14],S34,0xFDE5380C);
+    a=HH(a,b,c,d,x[k+1],S31,0xA4BEEA44);d=HH(d,a,b,c,x[k+4],S32,0x4BDECFA9);c=HH(c,d,a,b,x[k+7],S33,0xF6BB4B60);b=HH(b,c,d,a,x[k+10],S34,0xBEBFBC70);
+    a=HH(a,b,c,d,x[k+13],S31,0x289B7EC6);d=HH(d,a,b,c,x[k+0],S32,0xEAA127FA);c=HH(c,d,a,b,x[k+3],S33,0xD4EF3085);b=HH(b,c,d,a,x[k+6],S34,0x04881D05);
+    a=HH(a,b,c,d,x[k+9],S31,0xD9D4D039);d=HH(d,a,b,c,x[k+12],S32,0xE6DB99E5);c=HH(c,d,a,b,x[k+15],S33,0x1FA27CF8);b=HH(b,c,d,a,x[k+2],S34,0xC4AC5665);
+    a=II(a,b,c,d,x[k+0],S41,0xF4292244);d=II(d,a,b,c,x[k+7],S42,0x432AFF97);c=II(c,d,a,b,x[k+14],S43,0xAB9423A7);b=II(b,c,d,a,x[k+5],S44,0xFC93A039);
+    a=II(a,b,c,d,x[k+12],S41,0x655B59C3);d=II(d,a,b,c,x[k+3],S42,0x8F0CCC92);c=II(c,d,a,b,x[k+10],S43,0xFFEFF47D);b=II(b,c,d,a,x[k+1],S44,0x85845DD1);
+    a=II(a,b,c,d,x[k+8],S41,0x6FA87E4F);d=II(d,a,b,c,x[k+15],S42,0xFE2CE6E0);c=II(c,d,a,b,x[k+6],S43,0xA3014314);b=II(b,c,d,a,x[k+13],S44,0x4E0811A1);
+    a=II(a,b,c,d,x[k+4],S41,0xF7537E82);d=II(d,a,b,c,x[k+11],S42,0xBD3AF235);c=II(c,d,a,b,x[k+2],S43,0x2AD7D2BB);b=II(b,c,d,a,x[k+9],S44,0xEB86D391);
+    a=AddUnsigned(a,AA);b=AddUnsigned(b,BB);c=AddUnsigned(c,CC);d=AddUnsigned(d,DD);
+  }
+  return(WordToHex(a)+WordToHex(b)+WordToHex(c)+WordToHex(d)).toLowerCase();
+}
+
+function getUTCSignDate() {
+  var now=new Date();
+  function pad(n){return String(n).padStart(2,'0');}
+  return now.getUTCFullYear()+'-'+pad(now.getUTCMonth()+1)+'-'+pad(now.getUTCDate())+' '+pad(now.getUTCHours())+':'+pad(now.getUTCMinutes())+':'+pad(now.getUTCSeconds());
+}
+function normalizeHeaderNameMap(headers) {
+  var out={};Object.keys(headers||{}).forEach(function(k){out[k]=headers[k];});return out;
+}
+function parseRawQuery(url) {
+  var query=(url.split('?')[1]||'').split('#')[0],rawMap={};
+  query.split('&').forEach(function(pair){if(!pair)return;var idx=pair.indexOf('=');if(idx<0)return;rawMap[pair.slice(0,idx)]=pair.slice(idx+1);});
+  return rawMap;
+}
+function fingerprintOf(paramsRaw) {
+  var drop={sign:1,signDate:1,timestamp:1,ts:1,nonce:1,random:1,reqTime:1,reqId:1,requestId:1};
+  var base=Object.keys(paramsRaw||{}).filter(function(k){return !drop[k];}).sort().map(function(k){return k+'='+paramsRaw[k];}).join('&');
+  return MD5(base).slice(0,12);
+}
+function loadStore() {
+  var raw=$persistentStore.read(storeKey);
+  if(!raw)return{version:1,accounts:{},order:[]};
+  try{var obj=JSON.parse(raw);if(!obj.accounts)obj.accounts={};if(!Array.isArray(obj.order))obj.order=Object.keys(obj.accounts);return obj;}
+  catch(e){return{version:1,accounts:{},order:[]};}
+}
+function saveStore(store){$persistentStore.write(JSON.stringify(store),storeKey);}
+function notify(title,body){$notification.post(scriptName,title,body);}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function httpGet(url,headers) {
+  return new Promise(function(resolve,reject){
+    $httpClient.get({url:url,headers:headers},function(err,resp,body){
+      if(err)return reject({error:err});
+      resolve({body:body});
+    });
+  });
+}
+function buildSignedParamsRaw(capture) {
+  var params={};
+  Object.keys(capture.paramsRaw||{}).forEach(function(k){if(k!=='sign'&&k!=='signDate')params[k]=capture.paramsRaw[k];});
+  params.signDate=getUTCSignDate();
+  var signBase=Object.keys(params).sort().map(function(k){return k+'='+params[k];}).join('&');
+  params.sign=MD5(signBase+SECRET);
+  return params;
+}
+function buildUrl(path,capture) {
+  var params=buildSignedParamsRaw(capture);
+  var qs=Object.keys(params).map(function(k){return k+'='+encodeURIComponent(params[k]);}).join('&');
+  return 'https://api.pingmeapp.net/app/'+path+'?'+qs;
+}
+function buildHeaders(capture) {
+  var headers=Object.assign({},capture.headers||{});
+  ['Content-Length','content-length',':authority',':method',':path',':scheme'].forEach(function(k){delete headers[k];});
+  Object.keys(headers).forEach(function(k){if(k.toLowerCase()==='user-agent')delete headers[k];});
+  headers['Host']='api.pingmeapp.net';
+  headers['Accept']=headers['Accept']||'application/json';
+  return headers;
+}
+
+function runAccount(acc,index,total) {
+  var tag='[账号'+(index+1)+'/'+total+' '+(acc.alias||acc.id)+']';
+  var headers=buildHeaders(acc.capture);
+  var msgs=[tag];
+  console.log('\n===================');
+  console.log(tag+' 开始执行');
+  console.log('===================');
+  
+  function fetchApi(path){
+    console.log(tag+' 发起API请求: ['+path+']');
+    return httpGet(buildUrl(path,acc.capture),headers);
+  }
+
+  // 🚀 核心改造：Async/Await 版的神级视频循环，自带防抖重试与诱饵切IP
+  async function doVideoLoop(count) {
+    for (var i = 1; i <= count; i++) {
+      await sleep(i === 1 ? 1500 : VIDEO_DELAY);
+      console.log(tag+' 开始观看第 '+i+'/'+count+' 个视频...');
+      
+      var maxRetries = 3; // 最高重试3次
+      var success = false;
+      
+      for (var r = 1; r <= maxRetries; r++) {
+        try {
+          var res = await fetchApi('videoBonus');
+          var d = JSON.parse(res.body);
+          
+          if (d.retcode === 0) {
+            var bonus = (d.result && d.result.bonus) || '?';
+            console.log(tag+' 🎬 视频'+i+' 观看成功，获得奖励: +'+bonus+' Coins');
+            msgs.push('🎬 视频'+i+'：+'+bonus+' Coins');
+            success = true;
+            break; // 成功拿到钱，跳出重试循环，继续下一个视频
+          } else {
+            // 🎯 脏IP拦截特判
+            if (d.retmsg && d.retmsg.indexOf('尝试的次数过多') !== -1) {
+              console.log(tag+' ⚠️ 视频'+i+' (第'+r+'次尝试): 撞上脏IP被拦截 ('+d.retmsg+')');
+              if (r < maxRetries) {
+                console.log(tag+' 🔄 触发【强制换IP协议】：挂起 5 秒，并向 API 发送诱饵请求强切节点...');
+                await sleep(5000); // 挂起，等待底层连接释放
+                try { 
+                  // 🚀 核心黑魔法：向无关网址发请求，消耗掉当前的脏节点，逼迫 Loon 的负载均衡切到下一个节点
+                  await httpGet('https://api.myip.com', {}); 
+                } catch(e) {}
+                console.log(tag+' 🚀 IP切换指令已完成，发起第 '+(r+1)+' 次回马枪重试...');
+                continue; // 进行下一次重试
+              } else {
+                console.log(tag+' ⏸ 视频'+i+' 重试耗尽，果断放弃: '+d.retmsg);
+                msgs.push('⏸ 视频'+i+'：'+d.retmsg);
+                break; // 重试用光，跳出
+              }
+            } else {
+              // 遇到诸如 "今天没广告了" 这类非IP风控报错，直接结束当前号的视频任务
+              console.log(tag+' ⏸ 视频'+i+' 异常(不可重试): '+d.retmsg);
+              msgs.push('⏸ 视频'+i+'：'+d.retmsg);
+              break; 
+            }
+          }
+        } catch (e) {
+          console.log(tag+' ❌ 视频'+i+' 请求或解析失败 (第'+r+'次尝试)');
+          if (r === maxRetries) msgs.push('❌ 视频'+i+'：网络或解析失败');
+          
+          if (r < maxRetries) {
+            console.log(tag+' 🔄 网络波动，尝试强制切IP重试...');
+            await sleep(5000);
+            try { await httpGet('https://api.myip.com', {}); } catch(e) {}
+            continue;
+          } else {
+            break;
+          }
+        }
+      }
+      
+      // 如果经过反复重试，这个视频依然失败了，为了保护账号，直接中止这个账号剩下的视频任务
+      if (!success) {
+        console.log(tag+' 🛡️ 为保护账号安全，中止剩余视频任务。');
+        break; 
+      }
+    }
+  }
+
+  return fetchApi('queryBalanceAndBonus').then(function(res){
+    try{
+      var d=JSON.parse(res.body);
+      if(d.retcode===0){console.log(tag+' 💰 初始余额：'+d.result.balance+' Coins');msgs.push('💰 余额：'+d.result.balance+' Coins');}
+      else{console.log(tag+' ⚠️ 查询余额失败：'+d.retmsg);msgs.push('⚠️ 查询：'+d.retmsg);}
+    }catch(e){console.log(tag+' ❌ 查询余额解析失败');msgs.push('❌ 查询：解析失败');}
+    return fetchApi('checkIn');
+  }).then(function(res){
+    try{
+      var d=JSON.parse(res.body);
+      if(d.retcode===0){
+        var hint=((d.result&&d.result.bonusHint)||d.retmsg||'').replace(/\n/g,' ');
+        console.log(tag+' ✅ 签到成功：'+hint);
+        msgs.push('✅ 签到：'+hint);
+      }else{
+        console.log(tag+' ⚠️ 签到异常：'+d.retmsg);
+        msgs.push('⚠️ 签到：'+d.retmsg);
+      }
+    }catch(e){console.log(tag+' ❌ 签到解析失败');msgs.push('❌ 签到：解析失败');}
+    
+    // 接入改造后的视频循环
+    return doVideoLoop(MAX_VIDEO);
+    
+  }).then(function(){return fetchApi('queryBalanceAndBonus');}).then(function(res){
+    try{
+      var d=JSON.parse(res.body);
+      if(d.retcode===0){console.log(tag+' 💰 最新余额：'+d.result.balance+' Coins');msgs.push('💰 最新余额：'+d.result.balance+' Coins');}
+    }catch(e){}
+    return msgs.join('\n');
+  }).catch(function(err){
+    console.log(tag+' ❌ 账号运行异常: '+(err.error||String(err)));
+    msgs.push('❌ 异常：'+(err.error||String(err)));
+    return msgs.join('\n');
+  });
+}
+
+// 入口
+if(typeof $request !== 'undefined' && $request) {
+  var paramsRaw=parseRawQuery($request.url);
+  var headersMap=normalizeHeaderNameMap($request.headers||{});
+  var store=loadStore();
+  var fp=fingerprintOf(paramsRaw);
+  var nowTs=Date.now();
+  var existed=!!store.accounts[fp];
+  var alias=existed?store.accounts[fp].alias:'账号'+(store.order.length+1);
+  store.accounts[fp]={id:fp,alias:alias,capture:{url:$request.url,paramsRaw:paramsRaw,headers:headersMap},createdAt:existed?store.accounts[fp].createdAt:nowTs,updatedAt:nowTs};
+  if(!existed)store.order.push(fp);
+  saveStore(store);
+  var total=store.order.length;
+  notify(existed?'🔄 账号已更新':'✅ 新账号入库',alias+'（'+fp+'）\n共'+total+'个账号');
+  $done({});
+
+} else {
+  var store2=loadStore();
+  var ids=store2.order.filter(function(id){return store2.accounts[id];});
+  if(!ids.length){
+    notify('⚠️ 未抓到账号','请先打开 PingMe 触发抓包');
+    $done();
+  }else{
+    var total2=ids.length,results=[];
+    var chain=Promise.resolve();
+    console.log('=== 开始运行 PingMe 自动化，共 '+total2+' 个账号 ===');
+    ids.forEach(function(id,idx){
+      chain=chain
+        .then(function(){return runAccount(store2.accounts[id],idx,total2);})
+        .then(function(text){results.push(text);})
+        .then(function(){return idx<ids.length-1?sleep(ACCOUNT_GAP):null;});
+    });
+    chain.then(function(){
+      console.log('=== 任务全部执行完毕 ===');
+      notify('🎉 全部完成 ('+total2+'个账号)',results.join('\n———\n'));
+      $done();
+    }).catch(function(err){
+      console.log('❌ 顶层任务异常: '+(err.error||String(err)));
+      notify('❌ 任务异常',results.join('\n———\n')+'\n'+(err.error||String(err)));
+      $done();
+    });
+  }
+}
