@@ -34,7 +34,7 @@ const $ = new Env('WeTalk');
 const storeKey = 'wetalk_accounts_v1_g2';
 const SECRET = '0fOiukQq7jXZV2GRi9LGlO';
 const API_HOST = 'api.wetalkapp.com';
-const MAX_VIDEO = 5;
+const MAX_VIDEO = 6;
 const VIDEO_DELAY = 8000;
 const ACCOUNT_GAP = 3500;
 
