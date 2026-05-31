@@ -3,7 +3,7 @@
 // @Description：自带脏IP识别、强制轮询骗流切IP、断线重试黑魔法
 
 var scriptName = 'PingMe';
-var storeKey = 'pingme_accounts_v3_6'; // ⚠️ 已同步为你的 v3_3 存储桶
+var storeKey = 'pingme_accounts_v3_5'; // ⚠️ 已同步为你的 v3_3 存储桶
 var SECRET = '0fOiukQq7jXZV2GRi9LGlO';
 var MAX_VIDEO = 6;
 var VIDEO_DELAY = 8000;
