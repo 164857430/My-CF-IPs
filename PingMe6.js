@@ -4,7 +4,7 @@
 var scriptName = 'PingMe';
 var storeKey = 'pingme_accounts_v3_6';
 var SECRET = '0fOiukQq7jXZV2GRi9LGlO';
-var MAX_VIDEO = 5;
+var MAX_VIDEO = 6;
 var VIDEO_DELAY = 8000;
 var ACCOUNT_GAP = 3000;
 
