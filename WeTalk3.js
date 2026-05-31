@@ -470,3 +470,4 @@ if (typeof $request !== 'undefined' && $request) {
       $.done();
     });
   }
+}
