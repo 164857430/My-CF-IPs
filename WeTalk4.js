@@ -1,6 +1,7 @@
 // 2026/04/21
-// @Name：WeTalk 自动化签到+视频奖励
-// @Author：TG@ZenMoFiShi (Modified for Multi-Env)
+// @Name：WeTalk 自动化签到+视频奖励 (不死战斗版)
+// @Author：TG@ZenMoFiShi & 终极爆改
+// @Description：自带脏IP识别、强制轮询骗流切IP、断线重试黑魔法
 //
 // ====================================
 // [Quantumult X]
@@ -247,43 +248,72 @@ function runAccount(acc, index, total) {
     return $.fetch({ url, method: 'GET', headers });
   }
 
-  function doVideoLoop(count) {
-    let i = 0;
-    function next() {
-      if (i >= count) {
-        $.log(`${tag} 所有视频任务执行完毕`);
-        return Promise.resolve();
-      }
-      return new Promise(resolve => {
-        setTimeout(() => {
-          i++;
-          $.log(`${tag} 开始观看第 ${i}/${count} 个视频...`);
-          fetchApi('videoBonus').then(res => {
-            try {
-              const d = JSON.parse(res.body);
-              if (d.retcode === 0) {
-                $.log(`${tag} 🎬 视频${i} 观看成功，获得奖励: +${d.result?.bonus || '?'} Coins`);
-                msgs.push(`🎬 视频${i}：+${d.result?.bonus || '?'} Coins`);
-                resolve(next());
+  // 🚀 核心改造：Async/Await 版的神级视频循环，自带防抖重试与诱饵切IP
+  async function doVideoLoop(count) {
+    for (let i = 1; i <= count; i++) {
+      await sleep(i === 1 ? 1500 : VIDEO_DELAY);
+      $.log(`${tag} 开始观看第 ${i}/${count} 个视频...`);
+
+      const maxRetries = 3; // 最高重试3次
+      let success = false;
+
+      for (let r = 1; r <= maxRetries; r++) {
+        try {
+          const res = await fetchApi('videoBonus');
+          const d = JSON.parse(res.body);
+
+          if (d.retcode === 0) {
+            const bonus = d.result?.bonus || '?';
+            $.log(`${tag} 🎬 视频${i} 观看成功，获得奖励: +${bonus} Coins`);
+            msgs.push(`🎬 视频${i}：+${bonus} Coins`);
+            success = true;
+            break; // 成功拿到钱，跳出重试循环，继续下一个视频
+          } else {
+            // 🎯 脏IP拦截特判 (兼容了 WeTalk 可能的错误提示)
+            if (d.retmsg && (d.retmsg.indexOf('次数过多') !== -1 || d.retmsg.indexOf('频繁') !== -1)) {
+              $.log(`${tag} ⚠️ 视频${i} (第${r}次尝试): 撞上脏IP被拦截 (${d.retmsg})`);
+              if (r < maxRetries) {
+                $.log(`${tag} 🔄 触发【强制换IP协议】：挂起 5 秒，并向 API 发送诱饵请求强切节点...`);
+                await sleep(5000); // 挂起，等待底层连接释放
+                try { 
+                  // 🚀 核心黑魔法：向无关网址发请求，消耗掉当前的脏节点，逼迫 Loon/Surge 强切节点
+                  await $.fetch({ url: 'https://api.myip.com', method: 'GET' }); 
+                } catch(e) {}
+                $.log(`${tag} 🚀 IP切换指令已完成，发起第 ${r+1} 次回马枪重试...`);
+                continue; // 进行下一次重试
               } else {
-                $.log(`${tag} ⏸ 视频${i} 异常: ${d.retmsg}`);
+                $.log(`${tag} ⏸ 视频${i} 重试耗尽，果断放弃: ${d.retmsg}`);
                 msgs.push(`⏸ 视频${i}：${d.retmsg}`);
-                resolve();
+                break; // 重试用光，跳出
               }
-            } catch (e) {
-              $.log(`${tag} ❌ 视频${i} 解析失败: ${e}`);
-              msgs.push(`❌ 视频${i}：解析失败`);
-              resolve();
+            } else {
+              // 遇到诸如 "今天没广告了" 这类非IP风控报错，直接结束当前号的视频任务
+              $.log(`${tag} ⏸ 视频${i} 异常(不可重试): ${d.retmsg}`);
+              msgs.push(`⏸ 视频${i}：${d.retmsg}`);
+              break; 
             }
-          }).catch(err => {
-            $.log(`${tag} ❌ 视频${i} 网络请求失败: ${err}`);
-            msgs.push(`❌ 视频${i}：${err.error || '请求失败'}`);
-            resolve();
-          });
-        }, i === 0 ? 1500 : VIDEO_DELAY);
-      });
+          }
+        } catch (e) {
+          $.log(`${tag} ❌ 视频${i} 请求或解析失败 (第${r}次尝试)`);
+          if (r === maxRetries) msgs.push(`❌ 视频${i}：网络或解析失败`);
+          
+          if (r < maxRetries) {
+            $.log(`${tag} 🔄 网络波动，尝试强制切IP重试...`);
+            await sleep(5000);
+            try { await $.fetch({ url: 'https://api.myip.com', method: 'GET' }); } catch(err) {}
+            continue;
+          } else {
+            break;
+          }
+        }
+      }
+
+      // 如果经过反复重试，这个视频依然失败了，为了保护账号，直接中止这个账号剩下的视频任务
+      if (!success) {
+        $.log(`${tag} 🛡️ 为保护账号安全，中止剩余视频任务。`);
+        break; 
+      }
     }
-    return next();
   }
 
   return fetchApi('queryBalanceAndBonus').then(res => {
@@ -316,7 +346,10 @@ function runAccount(acc, index, total) {
       $.log(`${tag} ❌ 签到解析失败: ${e}`);
       msgs.push('❌ 签到：解析失败');
     }
+    
+    // 接入改造后的视频循环
     return doVideoLoop(MAX_VIDEO);
+    
   }).then(() => fetchApi('queryBalanceAndBonus')).then(res => {
     try {
       const d = JSON.parse(res.body);
