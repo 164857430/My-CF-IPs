@@ -1,5 +1,6 @@
-// @Name：PingMe 自动化签到+视频奖励 (Loon版 - 多账号)
-// @Author：怎么肥事
+// @Name：PingMe 自动化签到+视频奖励 (Loon版 - 多账号 - 不死战斗版)
+// @Author：怎么肥事 & 终极爆改
+// @Description：自带脏IP识别、强制轮询骗流切IP、断线重试黑魔法
 
 var scriptName = 'PingMe';
 var storeKey = 'pingme_accounts_v3_1';
@@ -141,46 +142,80 @@ function runAccount(acc,index,total) {
   console.log('\n===================');
   console.log(tag+' 开始执行');
   console.log('===================');
+  
   function fetchApi(path){
     console.log(tag+' 发起API请求: ['+path+']');
     return httpGet(buildUrl(path,acc.capture),headers);
   }
-  function doVideoLoop(count) {
-    var i=0;
-    function next(){
-      if(i>=count){console.log(tag+' 所有视频任务执行完毕');return Promise.resolve();}
-      return new Promise(function(resolve){
-        setTimeout(function(){
-          i++;
-          console.log(tag+' 开始观看第 '+i+'/'+count+' 个视频...');
-          fetchApi('videoBonus').then(function(res){
-            try{
-              var d=JSON.parse(res.body);
-              if(d.retcode===0){
-                var bonus=(d.result&&d.result.bonus)||'?';
-                console.log(tag+' 🎬 视频'+i+' 观看成功，获得奖励: +'+bonus+' Coins');
-                msgs.push('🎬 视频'+i+'：+'+bonus+' Coins');
-                resolve(next());
-              }else{
-                console.log(tag+' ⏸ 视频'+i+' 异常: '+d.retmsg);
+
+  // 🚀 核心改造：Async/Await 版的神级视频循环，自带防抖重试
+  async function doVideoLoop(count) {
+    for (var i = 1; i <= count; i++) {
+      await sleep(i === 1 ? 1500 : VIDEO_DELAY);
+      console.log(tag+' 开始观看第 '+i+'/'+count+' 个视频...');
+      
+      var maxRetries = 3; // 最高重试3次
+      var success = false;
+      
+      for (var r = 1; r <= maxRetries; r++) {
+        try {
+          var res = await fetchApi('videoBonus');
+          var d = JSON.parse(res.body);
+          
+          if (d.retcode === 0) {
+            var bonus = (d.result && d.result.bonus) || '?';
+            console.log(tag+' 🎬 视频'+i+' 观看成功，获得奖励: +'+bonus+' Coins');
+            msgs.push('🎬 视频'+i+'：+'+bonus+' Coins');
+            success = true;
+            break; // 成功拿到钱，跳出重试循环，继续下一个视频
+          } else {
+            // 🎯 脏IP拦截特判
+            if (d.retmsg && d.retmsg.indexOf('尝试的次数过多') !== -1) {
+              console.log(tag+' ⚠️ 视频'+i+' (第'+r+'次尝试): 撞上脏IP被拦截 ('+d.retmsg+')');
+              if (r < maxRetries) {
+                console.log(tag+' 🔄 触发【强制换IP协议】：挂起 5 秒，并向 API 发送诱饵请求强切节点...');
+                await sleep(5000); // 挂起，等待底层连接释放
+                try { 
+                  // 🚀 核心黑魔法：向无关网址发请求，消耗掉当前的脏节点，逼迫 Loon 的负载均衡切到下一个节点
+                  await httpGet('https://api.myip.com', {}); 
+                } catch(e) {}
+                console.log(tag+' 🚀 IP切换指令已完成，发起第 '+(r+1)+' 次回马枪重试...');
+                continue; // 进行下一次重试
+              } else {
+                console.log(tag+' ⏸ 视频'+i+' 重试耗尽，果断放弃: '+d.retmsg);
                 msgs.push('⏸ 视频'+i+'：'+d.retmsg);
-                resolve();
+                break; // 重试用光，跳出
               }
-            }catch(e){
-              console.log(tag+' ❌ 视频'+i+' 解析失败');
-              msgs.push('❌ 视频'+i+'：解析失败');
-              resolve();
+            } else {
+              // 遇到诸如 "今天没广告了" 这类非IP风控报错，直接结束当前号的视频任务
+              console.log(tag+' ⏸ 视频'+i+' 异常(不可重试): '+d.retmsg);
+              msgs.push('⏸ 视频'+i+'：'+d.retmsg);
+              break; 
             }
-          }).catch(function(err){
-            console.log(tag+' ❌ 视频'+i+' 请求失败: '+(err.error||''));
-            msgs.push('❌ 视频'+i+'：'+(err.error||'请求失败'));
-            resolve();
-          });
-        },i===0?1500:VIDEO_DELAY);
-      });
+          }
+        } catch (e) {
+          console.log(tag+' ❌ 视频'+i+' 请求或解析失败 (第'+r+'次尝试)');
+          if (r === maxRetries) msgs.push('❌ 视频'+i+'：网络或解析失败');
+          
+          if (r < maxRetries) {
+            console.log(tag+' 🔄 网络波动，尝试强制切IP重试...');
+            await sleep(5000);
+            try { await httpGet('https://api.myip.com', {}); } catch(e) {}
+            continue;
+          } else {
+            break;
+          }
+        }
+      }
+      
+      // 如果经过反复重试，这个视频依然失败了，为了保护账号，直接中止这个账号剩下的视频任务
+      if (!success) {
+        console.log(tag+' 🛡️ 为保护账号安全，中止剩余视频任务。');
+        break; 
+      }
     }
-    return next();
   }
+
   return fetchApi('queryBalanceAndBonus').then(function(res){
     try{
       var d=JSON.parse(res.body);
@@ -200,7 +235,10 @@ function runAccount(acc,index,total) {
         msgs.push('⚠️ 签到：'+d.retmsg);
       }
     }catch(e){console.log(tag+' ❌ 签到解析失败');msgs.push('❌ 签到：解析失败');}
+    
+    // 接入改造后的视频循环
     return doVideoLoop(MAX_VIDEO);
+    
   }).then(function(){return fetchApi('queryBalanceAndBonus');}).then(function(res){
     try{
       var d=JSON.parse(res.body);
@@ -257,3 +295,4 @@ if(typeof $request !== 'undefined' && $request) {
     });
   }
 }
+
