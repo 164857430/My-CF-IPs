@@ -1,5 +1,6 @@
 # Emby 相关直连规则
 DOMAIN,saodu6.cn,DIRECT               # 麦当劳
+DOMAIN-SUFFIX,wedg.top,DIRECT         # WE
 DOMAIN,cloudcube.wuxi.cn,DIRECT       # 大西瓜
 DOMAIN,speedtest-babybus.apple-cdn.net,DIRECT    # 月饼
 DOMAIN,media-qhxn-fj-home.qh6oss.ctyunxs.cn,DIRECT   # 鲨鱼
