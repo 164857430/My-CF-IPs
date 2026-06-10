@@ -1,18 +1,18 @@
 # Emby 相关直连规则
-DOMAIN,saodu6.cn,DIRECT               # 麦当劳
-DOMAIN-SUFFIX,wedg.top,DIRECT         # WE
-DOMAIN,cloudcube.wuxi.cn,DIRECT       # 大西瓜
-DOMAIN,speedtest-babybus.apple-cdn.net,DIRECT    # 月饼
-DOMAIN,media-qhxn-fj-home.qh6oss.ctyunxs.cn,DIRECT   # 鲨鱼
-DOMAIN,media-fjfz-fy-person01.fj7oss.ctyunxs.cn,DIRECT   # 可乐
-DOMAIN,emby.886318.xyz,DIRECT         # LEmby
-DOMAIN,cn-1.lyrebirdemby.online,DIRECT   # Lyrebird
-DOMAIN-SUFFIX,lilyemby.cc,DIRECT      # LilyEmby
-DOMAIN,cfstream.lilyya.top,DIRECT     # Lily
-DOMAIN,cf.xgua.de,DIRECT              # Xigua
-DOMAIN-SUFFIX,miraiemby.com,DIRECT    # Mirai
-DOMAIN,stream-1.sadchicktv.com,DIRECT # SadChick
-DOMAIN,cdn.zhezhi.art,DIRECT          # Zhezhi
-DOMAIN,cf.306699.xyz,DIRECT           # 大V
-DOMAIN-SUFFIX,hii.pp.ua,DIRECT        # PP UA 域名后缀
-DOMAIN-SUFFIX,dolby.dpdns.org,DIRECT  # Dolby 动态域名
+saodu6.cn,DIRECT               # 麦当劳
+*.wedg.top,DIRECT              # WE
+cloudcube.wuxi.cn,DIRECT       # 大西瓜
+speedtest-babybus.apple-cdn.net,DIRECT    # 月饼
+media-qhxn-fj-home.qh6oss.ctyunxs.cn,DIRECT   # 鲨鱼
+media-fjfz-fy-person01.fj7oss.ctyunxs.cn,DIRECT   # 可乐
+emby.886318.xyz,DIRECT         # LEmby
+cn-1.lyrebirdemby.online,DIRECT   # Lyrebird
+*.lilyemby.cc,DIRECT           # LilyEmby
+cfstream.lilyya.top,DIRECT     # Lily
+cf.xgua.de,DIRECT              # Xigua
+*.miraiemby.com,DIRECT         # Mirai
+stream-1.sadchicktv.com,DIRECT # SadChick
+cdn.zhezhi.art,DIRECT          # Zhezhi
+cf.306699.xyz,DIRECT           # 大V
+*.hii.pp.ua,DIRECT             # PP UA 域名后缀
+*.dolby.dpdns.org,DIRECT       # Dolby 动态域名
