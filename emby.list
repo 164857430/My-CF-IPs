@@ -15,5 +15,9 @@ DOMAIN,cdn.zhezhi.art,DIRECT
 DOMAIN,cf.306699.xyz,DIRECT
 DOMAIN-SUFFIX,hii.pp.ua,DIRECT
 DOMAIN-SUFFIX,dolby.dpdns.org,DIRECT
+DOMAIN,cfcdn.longemby.com,Proxy
+DOMAIN-SUFFIX,longemby.live,Proxy
+DOMAIN-SUFFIX,longemby.com,DIRECT
+DOMAIN-SUFFIX,longemby.top,DIRECT
 DOMAIN-SUFFIX,959722.xyz,DIRECT
 DOMAIN,cf.697758.xyz,DIRECT
