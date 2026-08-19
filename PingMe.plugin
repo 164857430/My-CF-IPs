@@ -1,0 +1,17 @@
+#!name = PingMe
+#!desc = 每日签到，loon适配版（多账号）
+#!date = 2026-4-20
+#!author = 怎么肥事[https://t.me/Nzmgs]
+#!icon = https://raw.githubusercontent.com/axhani/icon/refs/heads/main/PingMe.png
+#!loon_version = 3.2.4(787)
+
+[Argument]
+arg2 = switch,flag,tag=token
+arg1 = input,"30 8,20 * * *",tag=cron
+
+[Script]
+cron {arg1} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, timeout=120, tag=PingMe签到任务
+http-request ^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/PingMe.js, timeout=300, enable={arg2}, tag=token
+
+[MITM]
+hostname = api.pingmeapp.net

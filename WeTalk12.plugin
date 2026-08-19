@@ -1,0 +1,57 @@
+#!name = WeTalk
+#!desc = 每日签到，loon适配版（6账号分组 + 独立签到开关）
+#!date = 2026-4-22
+#!author = TG@ZenMoFiShi（修改为6组+独立签到开关）
+#!icon = https://raw.githubusercontent.com/Xhy333/QuantumultX/main/icon/WeTalk.png
+#!loon_version = 3.2.4(787)
+
+[Argument]
+# ==================== 组1 ====================
+arg1 = input,"55 */2 * * *",tag=cron组1
+arg2 = switch,flag,tag=token组1     # 抓包开关
+arg20 = switch,flag,tag=签到组1     # 签到开关
+
+# ==================== 组2 ====================
+arg3 = input,"0 */2 * * *",tag=cron组2
+arg5 = switch,flag,tag=token组2
+arg21 = switch,flag,tag=签到组2
+
+# ==================== 组3 ====================
+arg6 = input,"5 */2 * * *",tag=cron组3
+arg8 = switch,flag,tag=token组3
+arg22 = switch,flag,tag=签到组3
+
+# ==================== 组4 ====================
+arg9 = input,"10 */2 * * *",tag=cron组4
+arg11 = switch,flag,tag=token组4
+arg23 = switch,flag,tag=签到组4
+
+# ==================== 组5 ====================
+arg12 = input,"15 */2 * * *",tag=cron组5
+arg14 = switch,flag,tag=token组5
+arg24 = switch,flag,tag=签到组5
+
+# ==================== 组6 ====================
+arg15 = input,"20 */2 * * *",tag=cron组6
+arg17 = switch,flag,tag=token组6
+arg25 = switch,flag,tag=签到组6
+
+[Script]
+# ===================== 抓包部分（每个组独立脚本） =====================
+http-request ^https?:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk1.js, requires-body=true, timeout=300, enable={arg2}, tag=WeTalk抓包组1
+http-request ^https?:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk2.js, requires-body=true, timeout=300, enable={arg5}, tag=WeTalk抓包组2
+http-request ^https?:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk3.js, requires-body=true, timeout=300, enable={arg8}, tag=WeTalk抓包组3
+http-request ^https?:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk4.js, requires-body=true, timeout=300, enable={arg11}, tag=WeTalk抓包组4
+http-request ^https?:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk5.js, requires-body=true, timeout=300, enable={arg14}, tag=WeTalk抓包组5
+http-request ^https?:\/\/api\.wetalkapp\.com\/app\/queryBalanceAndBonus script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk6.js, requires-body=true, timeout=300, enable={arg17}, tag=WeTalk抓包组6
+
+# ===================== 定时签到部分（每个组独立脚本 + 独立开关） =====================
+cron {arg1} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk1.js, timeout=120, enable={arg20}, tag=WeTalk组1签到
+cron {arg3} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk2.js, timeout=120, enable={arg21}, tag=WeTalk组2签到
+cron {arg6} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk3.js, timeout=120, enable={arg22}, tag=WeTalk组3签到
+cron {arg9} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk4.js, timeout=120, enable={arg23}, tag=WeTalk组4签到
+cron {arg12} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk5.js, timeout=120, enable={arg24}, tag=WeTalk组5签到
+cron {arg15} script-path=https://raw.githubusercontent.com/164857430/My-CF-IPs/refs/heads/main/WeTalk6.js, timeout=120, enable={arg25}, tag=WeTalk组6签到
+
+[MITM]
+hostname = api.wetalkapp.com
