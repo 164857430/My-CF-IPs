@@ -8,6 +8,7 @@ DOMAIN,stream-1.sadchicktv.com,DIRECT
 DOMAIN,cdn.zhezhi.art,DIRECT
 DOMAIN,cf.306699.xyz,DIRECT
 DOMAIN-SUFFIX,haruno.de,DIRECT
+DOMAIN-SUFFIX,lilyemby.app,PROXY
 DOMAIN-SUFFIX,lilyemby.cc,DIRECT
 DOMAIN-SUFFIX,lilyemby.xyz,DIRECT
 DOMAIN-SUFFIX,longemby.com,DIRECT
